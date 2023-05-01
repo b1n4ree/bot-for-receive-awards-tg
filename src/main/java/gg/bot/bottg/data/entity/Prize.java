@@ -9,6 +9,7 @@ import lombok.Data;
 public class Prize {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "prize_day")

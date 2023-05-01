@@ -1,10 +1,12 @@
 package gg.bot.bottg.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.pengrad.telegrambot.model.Update;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Table(name = "user_and_message_statistic")
 @Entity
@@ -16,15 +18,21 @@ public class UserAndMessageStatistic {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "day")
+    @Column(name = "telegram_user_id")
+    private Long telegramUserId;
+
+    @Column(name = "timeOfAction")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDate day;
+    private LocalDateTime timeOfAction;
 
-    @Column(name = "count_message_per_day")
-    private Long countMessagePerDay;
+    @Column(name = "description_action")
+    private String descriptionAction;
 
-    @Column(name = "count_user_usage_per_day")
-    private Long countUserUsagePerDay;
+    @Column(name = "message_telegram_text")
+    private String messageTelegramText;
+
+    @Column(name = "")
+    private Long countUserUsagePerDay = 0L;
 
     @Column(name = "receive_prize_per_day")
     private Long receivePrizePerDay;

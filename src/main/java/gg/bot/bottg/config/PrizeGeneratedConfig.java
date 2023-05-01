@@ -4,7 +4,7 @@ import gg.bot.bottg.data.entity.Prize;
 import gg.bot.bottg.data.repository.PrizeRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -14,10 +14,13 @@ import java.util.List;
 @Slf4j
 public class PrizeGeneratedConfig {
 
-    @Autowired
-    private PrizeRepository prizeRepository;
+    private final PrizeRepository prizeRepository;
 
-    @PostConstruct
+    public PrizeGeneratedConfig(PrizeRepository prizeRepository) {
+        this.prizeRepository = prizeRepository;
+    }
+
+    @Bean
     public void createPrizes() {
 
         List<Prize> prizeList = new ArrayList<>();
