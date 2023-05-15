@@ -4,14 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
+import java.net.*;
 
 @Component
 public class ConnectionGizmoService {
@@ -28,12 +29,11 @@ public class ConnectionGizmoService {
 
     public String getToken() {
 
-
         String urlAuth = gizmoUrl + "/auth/token?username=" + gizmoLogin + "&password=" + gizmoPassword;
         String token = null;
         try {
             URL url = new URL(urlAuth);
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.connect();
 
@@ -100,5 +100,22 @@ public class ConnectionGizmoService {
         }
 
         return new Gson().fromJson(String.valueOf(response), JsonObject.class);
+    }
+
+    public void connectionPut(String token, String url) {
+
+        url = gizmoUrl + url;
+        System.out.println(url);
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+
+        HttpPut put = new HttpPut(url);
+        put.addHeader("Authorization","Bearer "+ token);
+        try {
+            HttpResponse response = httpClient.execute(put);
+            System.out.println(response.getStatusLine().getStatusCode());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

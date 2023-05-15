@@ -41,7 +41,12 @@ public class ScheduledTaskService {
             userWithGizmoAcc.forEach(user -> {
 
                 LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
-                LocalDate dateLastGetPrize = user.getDateGetPreviousPrize().toLocalDate();
+                LocalDate dateLastGetPrize;
+                try {
+                    dateLastGetPrize = user.getDateGetPreviousPrize().toLocalDate();
+                } catch (NullPointerException e) {
+                    dateLastGetPrize = currentDate;
+                }
                 long betweenWithCurrentAndLastGetPrizeDate = currentDate.toEpochDay() - dateLastGetPrize.toEpochDay();
 
                 if (betweenWithCurrentAndLastGetPrizeDate == 1) {

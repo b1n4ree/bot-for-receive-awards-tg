@@ -33,6 +33,10 @@ public class CallBackService {
     @Value("${gizmo_user_id}")
     private String userIdGizmo;
 
+    @Value("${gizmo_user_award_url}")
+    private String awardUser;
+
+
     public CallBackService(TelegramBot telegramBot, KeyboardService keyboardService, ConnectionGizmoService connectionGizmoService, UserRepository userRepository) {
 
         this.telegramBot = telegramBot;
@@ -178,6 +182,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №1 получен"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 25);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено"));

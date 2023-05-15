@@ -6,7 +6,6 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
 import gg.bot.bottg.condition.Conditions;
-import gg.bot.bottg.data.entity.Prize;
 import gg.bot.bottg.data.entity.User;
 import gg.bot.bottg.data.repository.PrizeRepository;
 import gg.bot.bottg.data.repository.UserRepository;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;

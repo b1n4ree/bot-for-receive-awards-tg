@@ -111,8 +111,9 @@ public class KeyboardService {
                 .addRow(new InlineKeyboardButton(strPrize4).callbackData("4"))
                 .addRow(new InlineKeyboardButton(strPrize5).callbackData("5"))
                 .addRow(new InlineKeyboardButton(strPrize6).callbackData("6"))
+                .addRow(new InlineKeyboardButton(strPrize7).callbackData("7"))
                 .addRow(new InlineKeyboardButton("\uD83D\uDD01").callbackData("update"),
-                        new InlineKeyboardButton(strPrize7).callbackData("7"),
+                        new InlineKeyboardButton("Наша группа").callbackData("zero").url("vk.com/ggclub36"),
                         new InlineKeyboardButton("➡\uFE0F").callbackData("up_to_second_page"));
     }
 
@@ -177,8 +178,9 @@ public class KeyboardService {
                 .addRow(new InlineKeyboardButton(strPrize11).callbackData("11"))
                 .addRow(new InlineKeyboardButton(strPrize12).callbackData("12"))
                 .addRow(new InlineKeyboardButton(strPrize13).callbackData("13"))
+                .addRow(new InlineKeyboardButton(strPrize14).callbackData("14"))
                 .addRow(new InlineKeyboardButton("⬅\uFE0F").callbackData("back_to_first_page"),
-                        new InlineKeyboardButton(strPrize14).callbackData("14"),
+                        new InlineKeyboardButton("Наша группа").callbackData("zero").url("vk.com/ggclub36"),
                         new InlineKeyboardButton("➡\uFE0F").callbackData("up_to_third_page"));
     }
 
@@ -243,8 +245,9 @@ public class KeyboardService {
                 .addRow(new InlineKeyboardButton(strPrize18).callbackData("18"))
                 .addRow(new InlineKeyboardButton(strPrize19).callbackData("19"))
                 .addRow(new InlineKeyboardButton(strPrize20).callbackData("20"))
+                .addRow(new InlineKeyboardButton(strPrize21).callbackData("21"))
                 .addRow(new InlineKeyboardButton("⬅\uFE0F").callbackData("back_to_second_page"),
-                        new InlineKeyboardButton(strPrize21).callbackData("21"),
+                        new InlineKeyboardButton("Наша группа").callbackData("zero").url("vk.com/ggclub36"),
                         new InlineKeyboardButton("➡\uFE0F").callbackData("up_to_fourth_page"));
     }
 
@@ -309,8 +312,9 @@ public class KeyboardService {
                 .addRow(new InlineKeyboardButton(strPrize25).callbackData("25"))
                 .addRow(new InlineKeyboardButton(strPrize26).callbackData("26"))
                 .addRow(new InlineKeyboardButton(strPrize27).callbackData("27"))
+                .addRow(new InlineKeyboardButton(strPrize28).callbackData("28"))
                 .addRow(new InlineKeyboardButton("⬅\uFE0F").callbackData("back_to_third_page"),
-                        new InlineKeyboardButton(strPrize28).callbackData("28"),
+                        new InlineKeyboardButton("Наша группа").callbackData("zero").url("vk.com/ggclub36"),
                         new InlineKeyboardButton(" ").callbackData("none"));
     }
 }

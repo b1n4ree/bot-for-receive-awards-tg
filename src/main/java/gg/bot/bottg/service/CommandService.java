@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ChatAction;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardRemove;
 import com.pengrad.telegrambot.request.*;
 import gg.bot.bottg.condition.Conditions;
@@ -73,15 +74,18 @@ public class CommandService {
                 log.info(ANSI_GREEN + "[/START]  User is saved by tgId=[" + telegramUserId  + "] and " +
                         "condition=[" + Conditions.START + "]");
 
-                telegramBot.execute(new SendMessage(telegramUserId, "Добро пожаловать. Это бот"));
+                telegramBot.execute(new SendSticker(telegramUserId, "CAACAgIAAxkBAAEI8htkXN6mcPt1AAEmxg1IBINt6P6H1oEAAtcYAAJuJuFLBWMtwpjr_KsvBA"));
                 telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.typing));
 
+
                 telegramBot.execute(new SendMessage(telegramUserId, """
-                        Бот предназначен для получения наград за покупки товаров/пакетов времени, внесение депозитов\uD83E\uDD73\s
-                        Как же получить?
-                         - Приходишь в GG +\s
-                         - Делаешь покупку(и) на минимальную необходимую сумму
-                         - Заходишь бота. Вводишь ник, на который совершаешь покупки в клубе, и пароль. Данные аккаунта проверяются""").replyMarkup(keyboardService.chooseYeaOrNo()));
+                        [inline URL](http://www.example.com/)
+                        Это GGBot😎
+                        Бот будет выдавать тебе награду. Для того, чтобы получить приз, нужно:
+                        1️⃣ Привязать клубный аккаунт к боту
+                        2️⃣ Прийти в GG и совершить любую покупку на аккаунте на сумму 100 рублей или более
+                        3️⃣ После покупки зайти в бота и нажать в меню призов(_будет выслано после привязки акка_) на кнопку с текущем днём
+                        """).parseMode(ParseMode.Markdown).replyMarkup(keyboardService.chooseYeaOrNo()));
 
             } else {
 
@@ -206,7 +210,7 @@ public class CommandService {
             } else {
 
                 telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.typing));
-                telegramBot.execute(new SendMessage(telegramUserId, "Аккаунт успешно привязан"));
+                telegramBot.execute(new SendMessage(telegramUserId, "Аккаунт успешно привязан").replyMarkup(new ReplyKeyboardRemove()));
                 telegramBot.execute(new SendMessage(telegramUserId, "Теперь тебе доступны призы").replyMarkup(
                         keyboardService.firstInlineKeyboardWithPrizes(telegramUserId)));
                 user.setAuthorizationInGizmoAccount(true);
