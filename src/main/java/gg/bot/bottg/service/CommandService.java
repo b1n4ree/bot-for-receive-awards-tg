@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import static gg.bot.bottg.service.BotService.ANSI_GREEN;
 
@@ -260,4 +261,20 @@ public class CommandService {
             }
         }
     }
+
+//    public void deleteUserData(Update update) {
+//
+//        Long telegramUserId = update.message().chat().id();
+//        Optional<User> user= userRepository.getUserByTelegramId(telegramUserId);
+//
+//        if ("/delete".equals(update.message().text()) && user.isPresent()) {
+//
+//            telegramBot.execute(new SendMessage(telegramUserId, "Вы уверены, что хотите удалить?"));
+//            user.get().setCondition(Conditions.DELETE_SELECT);
+//            userRepository.save(user.get());
+//
+//        } else if ("/delete".equals(update.message().text()) && user.isEmpty()) {
+//
+//            telegramBot.execute(new SendMessage(telegramUserId, ));
+//        }
 }

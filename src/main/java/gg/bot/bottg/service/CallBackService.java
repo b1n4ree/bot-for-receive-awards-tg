@@ -6,6 +6,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
 import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
+import com.pengrad.telegrambot.request.SendMessage;
 import gg.bot.bottg.data.entity.User;
 import gg.bot.bottg.data.repository.UserRepository;
 import gg.bot.bottg.jsonObjects.PrizeJson;
@@ -19,11 +20,17 @@ import java.time.ZoneId;
 
 @Component
 @Slf4j
+
 public class CallBackService {
 
     private final TelegramBot telegramBot;
     private final KeyboardService keyboardService;
     private final ConnectionGizmoService connectionGizmoService;
+    private final String TEXT_PACKAGE_TIME_GET = """
+                                                    Приз доступен!
+                                                    Подойди к админу и покажи это сообщение.
+                                                    Пакет времени можно получить до:
+                                                 """ + LocalDate.now(ZoneId.of("UTC+3")) + " 23:59";
 
     private final UserRepository userRepository;
 
@@ -73,7 +80,6 @@ public class CallBackService {
             if ("up_to_second_page".equalsIgnoreCase(update.callbackQuery().data())) {
 
                 if (user.getCurrentStreakDay() > 6) {
-
                     EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
                             .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
@@ -181,8 +187,8 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №1 получен"));
-                                String urlAward = String.format(awardUser, user.getGizmoName(), 25);
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("15 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 15);
                                 connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
@@ -191,10 +197,14 @@ public class CallBackService {
                         }
                     } else if (currentStreakDay == 0) {
                         user.setIsZeroingStreak(false);
+                        user.setPrizeJson(new PrizeJson());
+                        userRepository.save(user);
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Стрик был обнулён. Нажми ещё раз"));
                     }
                 } else {
+                    user.setCurrentStreakDay(0L);
                     user.setIsZeroingStreak(false);
+                    userRepository.save(user);
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Нажми ещё раз на награду, чтобы получить"));
                 }
             } else if ("2".equals(update.callbackQuery().data())) {
@@ -232,7 +242,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №2 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("20 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 20);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -241,10 +253,12 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -284,7 +298,8 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №3 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз получен!"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -296,7 +311,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -336,7 +351,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №4 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("25 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 25);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -348,7 +365,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -388,7 +405,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №5 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 30);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -400,7 +419,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -440,7 +459,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №6 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 35);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -452,7 +473,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -493,6 +514,7 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №7 получен"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -504,7 +526,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -544,7 +566,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №8 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("20 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 20);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -556,7 +580,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -596,7 +620,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №9 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("25 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 25);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -649,6 +675,7 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №10 получен"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -660,7 +687,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -700,7 +727,8 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №11 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -712,7 +740,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -752,7 +780,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №12 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 35);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -764,7 +794,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -804,7 +834,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №13 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("40 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 40);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -816,7 +848,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -857,6 +889,7 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №14 получен"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -868,7 +901,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -908,7 +941,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №15 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("25 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 25);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -920,7 +955,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -960,7 +995,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №16 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 30);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -972,7 +1009,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1013,6 +1050,7 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №17 получен"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1024,7 +1062,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1064,7 +1102,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №18 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 35);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1076,7 +1116,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1116,7 +1156,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №19 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("40 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 40);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1128,7 +1170,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1168,7 +1210,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №20 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("45 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 45);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1180,7 +1224,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1221,6 +1265,7 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №21 получен"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1232,7 +1277,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1272,7 +1317,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №22 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 30);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1284,7 +1331,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1324,7 +1371,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №23 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 35);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1336,7 +1385,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1377,6 +1426,7 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №24 получен"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1388,7 +1438,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1428,7 +1478,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №25 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("40 баллов получего"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 40);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1440,7 +1492,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1480,7 +1532,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №26 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("45 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 45);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1492,7 +1546,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1532,7 +1586,9 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №27 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("50 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 50);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1544,7 +1600,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
@@ -1577,6 +1633,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay28(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setIsZeroingStreak(true);
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
@@ -1585,6 +1642,7 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №28 получен"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1596,7 +1654,7 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));

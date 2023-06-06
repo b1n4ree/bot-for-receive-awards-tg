@@ -2,7 +2,6 @@ package gg.bot.bottg.service;
 
 import com.pengrad.telegrambot.model.request.*;
 import gg.bot.bottg.data.entity.Prize;
-import gg.bot.bottg.data.entity.User;
 import gg.bot.bottg.data.repository.PrizeRepository;
 import gg.bot.bottg.data.repository.UserRepository;
 import gg.bot.bottg.jsonObjects.PrizeJson;
