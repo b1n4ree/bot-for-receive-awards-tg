@@ -1,6 +1,6 @@
 package gg.bot.bottg.data.entity;
 
-import gg.bot.bottg.condition.Conditions;
+import gg.bot.bottg.enums.Conditions;
 import gg.bot.bottg.jsonObjects.PrizeJson;
 import gg.bot.bottg.jsonObjects.TimeGetPrizeUserJson;
 import jakarta.persistence.*;
@@ -74,4 +74,7 @@ public class User {
 
     @Column(name = "is_zeroing_streak")
     private Boolean isZeroingStreak = false;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 }

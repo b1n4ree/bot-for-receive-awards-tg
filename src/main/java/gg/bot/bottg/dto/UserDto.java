@@ -1,6 +1,6 @@
 package gg.bot.bottg.dto;
 
-import gg.bot.bottg.condition.Conditions;
+import gg.bot.bottg.enums.Conditions;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

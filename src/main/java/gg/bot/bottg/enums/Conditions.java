@@ -1,4 +1,4 @@
-package gg.bot.bottg.condition;
+package gg.bot.bottg.enums;
 
 public enum Conditions {
     START,

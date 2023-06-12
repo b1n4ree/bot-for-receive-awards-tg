@@ -5,7 +5,7 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.BaseResponse;
-import gg.bot.bottg.condition.Conditions;
+import gg.bot.bottg.enums.Conditions;
 import gg.bot.bottg.data.entity.User;
 import gg.bot.bottg.data.repository.PrizeRepository;
 import gg.bot.bottg.data.repository.UserRepository;
@@ -107,8 +107,6 @@ public class BotService implements UpdatesListener {
                     System.out.println(user.getCondition());
                     if (user.getCondition() != null) {
 
-                        commandService.getPrizeInlineKeyboard(update);
-
                         if (Conditions.START.equals(user.getCondition())) {
 
                             commandService.yesOrNoCommand(update);
@@ -125,9 +123,16 @@ public class BotService implements UpdatesListener {
 
                             commandService.waitGizmoPasswordCommand(update);
 
+                        } else if (Conditions.DELETE_SELECT.equals(user.getCondition())) {
+
+//                            commandService.deleteUserData(update);
+
                         } else {
 
+                            commandService.sendAllUsersIdAndName(update);
+                            commandService.sendMessageToUser(update);
                             commandService.getPrizeInlineKeyboard(update);
+//                            commandService.deleteUserData(update);
                         }
                     }
                 }

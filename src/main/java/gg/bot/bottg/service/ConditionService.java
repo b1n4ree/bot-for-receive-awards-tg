@@ -1,6 +1,6 @@
 package gg.bot.bottg.service;
 
-import gg.bot.bottg.condition.Conditions;
+import gg.bot.bottg.enums.Conditions;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
