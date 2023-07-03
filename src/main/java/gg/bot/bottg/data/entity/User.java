@@ -59,6 +59,7 @@ public class User {
     private Boolean authorizationInGizmoAccount = false;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "condition_user")
     private Conditions condition;
 
     @Column(name = "prize")

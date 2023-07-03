@@ -61,6 +61,7 @@ public class BotService implements UpdatesListener {
     private final CallBackService callBackService;
     private final CommandService commandService;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(3);
+    private final SessionService sessionService;
 
     @Setter
     private String token;
@@ -68,12 +69,13 @@ public class BotService implements UpdatesListener {
 
     public BotService(TelegramBot telegramBot, KeyboardService keyboardService, ConnectionGizmoService connectionGizmoService,
                       UserRepository userRepository, CallBackService callBackService, CommandService commandService,
-                      PrizeRepository prizeRepository) {
+                      PrizeRepository prizeRepository, SessionService sessionService) {
         this.userRepository = userRepository;
         this.telegramBot = telegramBot;
         this.keyboardService = keyboardService;
         this.callBackService = callBackService;
         this.commandService = commandService;
+        this.sessionService = sessionService;
         telegramBot.setUpdatesListener(this);
         this.prizeRepository = prizeRepository;
     }
@@ -132,6 +134,8 @@ public class BotService implements UpdatesListener {
                             commandService.sendAllUsersIdAndName(update);
                             commandService.sendMessageToUser(update);
                             commandService.getPrizeInlineKeyboard(update);
+                            commandService.getComputersSessions(update);
+                            commandService.sendMessageToAllUsers(update);
 //                            commandService.deleteUserData(update);
                         }
                     }

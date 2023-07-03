@@ -3,6 +3,7 @@ package gg.bot.bottg.enums;
 public enum Conditions {
     START,
     CHOOSE_STREAK_OR_INFO,
+    CHOOSE_NO,
     SELECTED_STREAK_AND_WAIT_GIZMO_LOGIN,
     SELECTED_STREAK_AND_WAIT_GIZMO_PASS,
     AGAIN_ENTER_LOGIN_PASSWORD,

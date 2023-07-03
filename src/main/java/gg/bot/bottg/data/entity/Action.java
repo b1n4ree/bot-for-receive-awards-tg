@@ -24,9 +24,13 @@ public class Action {
     @Column(name = "current_streak_day")
     private Long currentStreakDay;
 
+    @Column(name = "money_spent_in_current_day")
+    private Long moneySpent;
+
     @Column(name = "action")
     private String action;
 
     @Column(name = "date")
     private LocalDateTime date = LocalDateTime.now(ZoneId.of("UTC+3"));
 }
+

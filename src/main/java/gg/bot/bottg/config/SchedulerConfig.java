@@ -8,7 +8,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 @EnableAsync
-@ConditionalOnProperty(name = "schedule.enabled", matchIfMissing = true)
 public class SchedulerConfig {
 
 }

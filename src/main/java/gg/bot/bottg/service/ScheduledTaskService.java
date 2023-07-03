@@ -6,6 +6,7 @@ import gg.bot.bottg.data.entity.User;
 import gg.bot.bottg.data.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class ScheduledTaskService {
+
+    @Value("${telegram_id_al}")
+    private Long myTelegramId;
 
     @Autowired
     UserRepository userRepository;
@@ -51,7 +55,8 @@ public class ScheduledTaskService {
 
                 if (betweenWithCurrentAndLastGetPrizeDate == 1) {
                     telegramBot.execute(new SendMessage(user.getTelegramId(), "Не прерывай стрик! Успей получить " +
-                            "награду сегодня"));
+                            "награду сегодня" +
+                            "\nТекущий стрик " + user.getCurrentStreakDay()).disableNotification(true));
                 }
             });
         }

@@ -8,6 +8,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,28 +52,7 @@ public class ConnectionGizmoService {
 
     public JsonObject connectionGet(String token, String url) {
 
-        URL urlUserSpending = null;
-
-        try {
-            urlUserSpending = new URL(gizmoUrl + url);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException();
-        }
-
-        HttpURLConnection conn = null;
-        try {
-            conn = (HttpURLConnection) urlUserSpending.openConnection();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        conn.setRequestProperty("Authorization","Bearer "+ token);
-        conn.setRequestProperty("Content-Type","application/json");
-        try {
-            conn.setRequestMethod("GET");
-        } catch (ProtocolException e) {
-            throw new RuntimeException(e);
-        }
+        HttpURLConnection conn = getHttpURLConnection(token, url);
 
         BufferedReader in = null;
         try {
@@ -102,6 +82,33 @@ public class ConnectionGizmoService {
         return new Gson().fromJson(String.valueOf(response), JsonObject.class);
     }
 
+    @NotNull
+    private HttpURLConnection getHttpURLConnection(String token, String url) {
+        URL urlUserSpending = null;
+
+        try {
+            urlUserSpending = new URL(gizmoUrl + url);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException();
+        }
+
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) urlUserSpending.openConnection();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        conn.setRequestProperty("Authorization","Bearer "+ token);
+        conn.setRequestProperty("Content-Type","application/json");
+        try {
+            conn.setRequestMethod("GET");
+        } catch (ProtocolException e) {
+            throw new RuntimeException(e);
+        }
+        return conn;
+    }
+
     public void connectionPut(String token, String url) {
 
         url = gizmoUrl + url;
@@ -116,6 +123,5 @@ public class ConnectionGizmoService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
 }

@@ -1,16 +1,23 @@
 package gg.bot.bottg.service;
 
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.AnswerCallbackQuery;
 import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import gg.bot.bottg.data.entity.Action;
 import gg.bot.bottg.data.entity.User;
+import gg.bot.bottg.data.repository.ActionRepository;
 import gg.bot.bottg.data.repository.UserRepository;
+import gg.bot.bottg.enums.Actions;
 import gg.bot.bottg.jsonObjects.PrizeJson;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +34,7 @@ public class CallBackService {
     private final KeyboardService keyboardService;
     private final ConnectionGizmoService connectionGizmoService;
     private final String TEXT_PACKAGE_TIME_GET = """
-                                                    Приз доступен!
+                                                    Награда доступна!
                                                     Подойди к админу и покажи это сообщение.
                                                     Пакет времени можно получить до:
                                                  """ + LocalDate.now(ZoneId.of("UTC+3")) + " 23:59";
@@ -43,6 +50,9 @@ public class CallBackService {
     @Value("${gizmo_user_award_url}")
     private String awardUser;
 
+    @Autowired
+    ActionRepository actionRepository;
+
 
     public CallBackService(TelegramBot telegramBot, KeyboardService keyboardService, ConnectionGizmoService connectionGizmoService, UserRepository userRepository) {
 
@@ -53,6 +63,8 @@ public class CallBackService {
     }
 
     public void callbackHandler(Update update) {
+
+        Action action = new Action();
 
         if (update.callbackQuery() != null) {
 
@@ -86,10 +98,18 @@ public class CallBackService {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()));
                     telegramBot.execute(editMessageReplyMarkup);
 
+                    action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(2) + "_SUCCESS_UP");
+
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Следующая неделя разблокируется " +
-                            "только после того, как получите последнюю награду за текущую неделю"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Разблокируется при завершении первой недели"));
+
+                    action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(2) + "_UNSUCCESS_UP");
                 }
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
 
             } else if ("back_to_first_page".equalsIgnoreCase(update.callbackQuery().data())) {
 
@@ -98,6 +118,13 @@ public class CallBackService {
 
                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()));
                 telegramBot.execute(editMessageReplyMarkup);
+
+                action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(1) + "_SUCCESS_UP");
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
 
             } else if ("up_to_third_page".equalsIgnoreCase(update.callbackQuery().data())) {
 
@@ -109,10 +136,18 @@ public class CallBackService {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()));
                     telegramBot.execute(editMessageReplyMarkup);
 
+                    action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(3) + "_SUCCESS_UP");
+
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Следующая неделя разблокируется " +
-                            "только после того, как получите последнюю награду за текущую неделю"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Разблокируется при завершении первой недели"));
+
+                    action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(3) + "_UNSUCCESS_UP");
                 }
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
 
             } else if ("back_to_second_page".equalsIgnoreCase(update.callbackQuery().data())) {
 
@@ -121,6 +156,13 @@ public class CallBackService {
 
                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()));
                 telegramBot.execute(editMessageReplyMarkup);
+
+                action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(2) + "_SUCCESS_UP");
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
 
             } else if ("up_to_fourth_page".equalsIgnoreCase(update.callbackQuery().data())) {
 
@@ -131,10 +173,18 @@ public class CallBackService {
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()));
                     telegramBot.execute(editMessageReplyMarkup);
 
+                    action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(4) + "_SUCCESS_UP");
+
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Следующая неделя разблокируется " +
-                            "только после того, как получите последнюю награду за текущую неделю"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Разблокируется при завершении первой недели"));
+
+                    action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(4) + "_UNSUCCESS_UP");
                 }
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
 
             } else if ("back_to_third_page".equalsIgnoreCase(update.callbackQuery().data())) {
 
@@ -144,13 +194,27 @@ public class CallBackService {
                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()));
                 telegramBot.execute(editMessageReplyMarkup);
 
+                action.setAction(Actions.CALLBACK_PAGE_GO_TO.callbackPage(3) + "_SUCCESS_UP");
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("update".equalsIgnoreCase(update.callbackQuery().data())) {
 
-                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("!!!!!!!!!!"));
+                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Обновил"));
                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
                         .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                 telegramBot.execute(editMessageReplyMarkup);
+
+                action.setAction(Actions.CALLBACK_UPDATE_PAGE.toString());
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
 
             } else if ("1".equals(update.callbackQuery().data())) {
                 if (!user.getIsZeroingStreak()) {
@@ -159,7 +223,6 @@ public class CallBackService {
 
                             LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
                             LocalDate dateGetPreviousPrize = currentDate.plusDays(1);
-                            long betweenDateGetPrevPrizeAndCurrentDate = 1;
                             String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, dateGetPreviousPrize);
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
@@ -195,11 +258,8 @@ public class CallBackService {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено"));
                             }
                         }
-                    } else if (currentStreakDay == 0) {
-                        user.setIsZeroingStreak(false);
-                        user.setPrizeJson(new PrizeJson());
-                        userRepository.save(user);
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Стрик был обнулён. Нажми ещё раз"));
+                    } else {
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                     }
                 } else {
                     user.setCurrentStreakDay(0L);
@@ -207,6 +267,14 @@ public class CallBackService {
                     userRepository.save(user);
                     telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Нажми ещё раз на награду, чтобы получить"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(1));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("2".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay2()) {
                     if (currentStreakDay == 1) {
@@ -217,7 +285,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -235,11 +303,400 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay2(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
+
+                                telegramBot.execute(editMessageReplyMarkup);
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("20 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 20);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
+
+                            } else {
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
+                            }
+                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
+                        } else {
+                            user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день. Нажми на \uD83D\uDD01"));
+                        }
+                    } else {
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
+                    }
+                } else {
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
+                }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(2));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
+            } else if ("3".equals(update.callbackQuery().data())) {
+                if (!statusPrize.getReceivedPrizeOfDay3()) {
+                    if (currentStreakDay == 2) {
+
+                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
+                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
+                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
+
+                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
+
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
+                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
+                            log.info(jsonObjectSpending.toString());
+
+                            float spendingMoneyInDay = 0f;
+                            try {
+                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
+                                        .get(0).getAsJsonObject().get("total").getAsFloat();
+                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+                                log.info("Ни рубля не потратил :(");
+                            }
+                            user.setMoneySpentInDay((long) spendingMoneyInDay);
+                            System.out.println("Spend money: " + spendingMoneyInDay);
+
+                            if (spendingMoneyInDay >= 100) {
+
+                                statusPrize.setReceivedPrizeOfDay3(true);
+                                user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
+                                user.setPrizeJson(statusPrize);
+                                userRepository.save(user);
+
+                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
+                                        .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
+
+                                telegramBot.execute(editMessageReplyMarkup);
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена!"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+
+                            } else {
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
+                            }
+                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
+                        } else {
+                            user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
+                        }
+                    } else {
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
+                    }
+                } else {
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
+                }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(3));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
+            } else if ("4".equals(update.callbackQuery().data())) {
+                if (!statusPrize.getReceivedPrizeOfDay4()) {
+                    if (currentStreakDay == 3) {
+
+                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
+                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
+                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
+
+                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
+
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
+                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
+                            log.info(jsonObjectSpending.toString());
+
+                            float spendingMoneyInDay = 0f;
+                            try {
+                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
+                                        .get(0).getAsJsonObject().get("total").getAsFloat();
+                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+                                log.info("Ни рубля не потратил :(");
+                            }
+                            user.setMoneySpentInDay((long) spendingMoneyInDay);
+                            System.out.println("Spend money: " + spendingMoneyInDay);
+
+                            if (spendingMoneyInDay >= 100) {
+
+                                statusPrize.setReceivedPrizeOfDay4(true);
+                                user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
+                                user.setPrizeJson(statusPrize);
+                                userRepository.save(user);
+
+                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
+                                        .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
+
+                                telegramBot.execute(editMessageReplyMarkup);
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("25 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 25);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
+
+                            } else {
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
+                            }
+                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
+                        } else {
+                            user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
+                        }
+                    } else {
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
+                    }
+                } else {
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
+                }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(4));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
+            } else if ("5".equals(update.callbackQuery().data())) {
+                if (!statusPrize.getReceivedPrizeOfDay5()) {
+                    if (currentStreakDay == 4) {
+
+                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
+                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
+                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
+
+                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
+
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
+                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
+                            log.info(jsonObjectSpending.toString());
+
+                            float spendingMoneyInDay = 0f;
+                            try {
+                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
+                                        .get(0).getAsJsonObject().get("total").getAsFloat();
+                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+                                log.info("Ни рубля не потратил :(");
+                            }
+                            user.setMoneySpentInDay((long) spendingMoneyInDay);
+                            System.out.println("Spend money: " + spendingMoneyInDay);
+
+                            if (spendingMoneyInDay >= 100) {
+
+                                statusPrize.setReceivedPrizeOfDay5(true);
+                                user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
+                                user.setPrizeJson(statusPrize);
+                                userRepository.save(user);
+
+                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
+                                        .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
+
+                                telegramBot.execute(editMessageReplyMarkup);
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 30);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
+
+                            } else {
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
+                            }
+                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
+                        } else {
+                            user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
+                        }
+                    } else {
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
+                    }
+                } else {
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
+                }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(5));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
+            } else if ("6".equals(update.callbackQuery().data())) {
+                if (!statusPrize.getReceivedPrizeOfDay6()) {
+                    if (currentStreakDay == 5) {
+
+                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
+                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
+                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
+
+                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
+
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
+                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
+                            log.info(jsonObjectSpending.toString());
+
+                            float spendingMoneyInDay = 0f;
+                            try {
+                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
+                                        .get(0).getAsJsonObject().get("total").getAsFloat();
+                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+                                log.info("Ни рубля не потратил :(");
+                            }
+                            user.setMoneySpentInDay((long) spendingMoneyInDay);
+                            System.out.println("Spend money: " + spendingMoneyInDay);
+
+                            if (spendingMoneyInDay >= 100) {
+
+                                statusPrize.setReceivedPrizeOfDay6(true);
+                                user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
+                                user.setPrizeJson(statusPrize);
+                                userRepository.save(user);
+
+                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
+                                        .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
+
+                                telegramBot.execute(editMessageReplyMarkup);
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
+                                String urlAward = String.format(awardUser, user.getGizmoName(), 35);
+                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
+
+                            } else {
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
+                            }
+                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
+                        } else {
+                            user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
+                        }
+                    } else {
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
+                    }
+                } else {
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
+                }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(6));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
+            } else if ("7".equals(update.callbackQuery().data())) {
+                if (!statusPrize.getReceivedPrizeOfDay7()) {
+                    if (currentStreakDay == 6) {
+
+                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
+                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
+                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
+
+                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
+
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
+                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
+                            log.info(jsonObjectSpending.toString());
+
+                            float spendingMoneyInDay = 0f;
+                            try {
+                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
+                                        .get(0).getAsJsonObject().get("total").getAsFloat();
+                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+                                log.info("Ни рубля не потратил :(");
+                            }
+                            user.setMoneySpentInDay((long) spendingMoneyInDay);
+                            System.out.println("Spend money: " + spendingMoneyInDay);
+
+                            if (spendingMoneyInDay >= 100) {
+
+                                statusPrize.setReceivedPrizeOfDay7(true);
+                                user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
+                                user.setPrizeJson(statusPrize);
+                                userRepository.save(user);
+
+                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
+                                        .replyMarkup(keyboardService.firstInlineKeyboardWithPrizes(userIdCallbackQuery));
+
+                                telegramBot.execute(editMessageReplyMarkup);
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+
+                            } else {
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
+                            }
+                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
+                        } else {
+                            user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
+                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
+                        }
+                    } else {
+                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
+                    }
+                } else {
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
+                }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(7));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
+            } else if ("8".equals(update.callbackQuery().data())) {
+                if (!statusPrize.getReceivedPrizeOfDay8()) {
+                    if (currentStreakDay == 7) {
+
+                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
+                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
+                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
+
+                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
+
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
+                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
+                            log.info(jsonObjectSpending.toString());
+
+                            float spendingMoneyInDay = 0f;
+                            try {
+                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
+                                        .get(0).getAsJsonObject().get("total").getAsFloat();
+                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+                                log.info("Ни рубля не потратил :(");
+                            }
+                            user.setMoneySpentInDay((long) spendingMoneyInDay);
+                            System.out.println("Spend money: " + spendingMoneyInDay);
+
+                            if (spendingMoneyInDay >= 100) {
+
+                                statusPrize.setReceivedPrizeOfDay8(true);
+                                user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
+                                user.setPrizeJson(statusPrize);
+                                userRepository.save(user);
+
+                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
+                                        .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("20 баллов получено"));
@@ -261,330 +718,16 @@ public class CallBackService {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
-            } else if ("3".equals(update.callbackQuery().data())) {
-                if (!statusPrize.getReceivedPrizeOfDay3()) {
-                    if (currentStreakDay == 2) {
 
-                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
-                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
-                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(8));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
 
-                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
-
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
-                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
-                            log.info(jsonObjectSpending.toString());
-
-                            float spendingMoneyInDay = 0f;
-                            try {
-                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
-                                        .get(0).getAsJsonObject().get("total").getAsFloat();
-                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                                log.info("Ни рубля не потратил :(");
-                            }
-                            user.setMoneySpentInDay((long) spendingMoneyInDay);
-                            System.out.println("Spend money: " + spendingMoneyInDay);
-
-                            if (spendingMoneyInDay >= 100) {
-
-                                statusPrize.setReceivedPrizeOfDay3(true);
-                                user.setCurrentStreakDay(currentStreakDay + 1);
-                                user.setPrizeJson(statusPrize);
-                                userRepository.save(user);
-
-                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
-
-                                telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз получен!"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
-
-                            } else {
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
-                            }
-                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
-                        } else {
-                            user.setIsZeroingStreak(true);
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
-                        }
-                    } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
-                    }
-                } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
-                }
-            } else if ("4".equals(update.callbackQuery().data())) {
-                if (!statusPrize.getReceivedPrizeOfDay4()) {
-                    if (currentStreakDay == 3) {
-
-                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
-                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
-                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
-
-                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
-
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
-                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
-                            log.info(jsonObjectSpending.toString());
-
-                            float spendingMoneyInDay = 0f;
-                            try {
-                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
-                                        .get(0).getAsJsonObject().get("total").getAsFloat();
-                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                                log.info("Ни рубля не потратил :(");
-                            }
-                            user.setMoneySpentInDay((long) spendingMoneyInDay);
-                            System.out.println("Spend money: " + spendingMoneyInDay);
-
-                            if (spendingMoneyInDay >= 100) {
-
-                                statusPrize.setReceivedPrizeOfDay4(true);
-                                user.setCurrentStreakDay(currentStreakDay + 1);
-                                user.setPrizeJson(statusPrize);
-                                userRepository.save(user);
-
-                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
-
-                                telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("25 баллов получено"));
-                                String urlAward = String.format(awardUser, user.getGizmoName(), 25);
-                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
-
-                            } else {
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
-                            }
-                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
-                        } else {
-                            user.setIsZeroingStreak(true);
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
-                        }
-                    } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
-                    }
-                } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
-                }
-            } else if ("5".equals(update.callbackQuery().data())) {
-                if (!statusPrize.getReceivedPrizeOfDay5()) {
-                    if (currentStreakDay == 4) {
-
-                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
-                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
-                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
-
-                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
-
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
-                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
-                            log.info(jsonObjectSpending.toString());
-
-                            float spendingMoneyInDay = 0f;
-                            try {
-                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
-                                        .get(0).getAsJsonObject().get("total").getAsFloat();
-                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                                log.info("Ни рубля не потратил :(");
-                            }
-                            user.setMoneySpentInDay((long) spendingMoneyInDay);
-                            System.out.println("Spend money: " + spendingMoneyInDay);
-
-                            if (spendingMoneyInDay >= 100) {
-
-                                statusPrize.setReceivedPrizeOfDay5(true);
-                                user.setCurrentStreakDay(currentStreakDay + 1);
-                                user.setPrizeJson(statusPrize);
-                                userRepository.save(user);
-
-                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
-
-                                telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
-                                String urlAward = String.format(awardUser, user.getGizmoName(), 30);
-                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
-
-                            } else {
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
-                            }
-                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
-                        } else {
-                            user.setIsZeroingStreak(true);
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
-                        }
-                    } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
-                    }
-                } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
-                }
-            } else if ("6".equals(update.callbackQuery().data())) {
-                if (!statusPrize.getReceivedPrizeOfDay6()) {
-                    if (currentStreakDay == 5) {
-
-                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
-                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
-                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
-
-                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
-
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
-                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
-                            log.info(jsonObjectSpending.toString());
-
-                            float spendingMoneyInDay = 0f;
-                            try {
-                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
-                                        .get(0).getAsJsonObject().get("total").getAsFloat();
-                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                                log.info("Ни рубля не потратил :(");
-                            }
-                            user.setMoneySpentInDay((long) spendingMoneyInDay);
-                            System.out.println("Spend money: " + spendingMoneyInDay);
-
-                            if (spendingMoneyInDay >= 100) {
-
-                                statusPrize.setReceivedPrizeOfDay6(true);
-                                user.setCurrentStreakDay(currentStreakDay + 1);
-                                user.setPrizeJson(statusPrize);
-                                userRepository.save(user);
-
-                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
-
-                                telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
-                                String urlAward = String.format(awardUser, user.getGizmoName(), 35);
-                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
-
-                            } else {
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
-                            }
-                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
-                        } else {
-                            user.setIsZeroingStreak(true);
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
-                        }
-                    } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
-                    }
-                } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
-                }
-            } else if ("7".equals(update.callbackQuery().data())) {
-                if (!statusPrize.getReceivedPrizeOfDay7()) {
-                    if (currentStreakDay == 6) {
-
-                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
-                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
-                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
-
-                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
-
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
-                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
-                            log.info(jsonObjectSpending.toString());
-
-                            float spendingMoneyInDay = 0f;
-                            try {
-                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
-                                        .get(0).getAsJsonObject().get("total").getAsFloat();
-                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                                log.info("Ни рубля не потратил :(");
-                            }
-                            user.setMoneySpentInDay((long) spendingMoneyInDay);
-                            System.out.println("Spend money: " + spendingMoneyInDay);
-
-                            if (spendingMoneyInDay >= 100) {
-
-                                statusPrize.setReceivedPrizeOfDay7(true);
-                                user.setCurrentStreakDay(currentStreakDay + 1);
-                                user.setPrizeJson(statusPrize);
-                                userRepository.save(user);
-
-                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
-
-                                telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №7 получен"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
-
-                            } else {
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
-                            }
-                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
-                        } else {
-                            user.setIsZeroingStreak(true);
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
-                        }
-                    } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
-                    }
-                } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
-                }
-            } else if ("8".equals(update.callbackQuery().data())) {
-                if (!statusPrize.getReceivedPrizeOfDay8()) {
-                    if (currentStreakDay == 7) {
-
-                        LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+3"));
-                        LocalDate dateGetPreviousPrize = user.getDateGetPreviousPrize().toLocalDate();
-                        long betweenDateGetPrevPrizeAndCurrentDate = currentDate.toEpochDay() - dateGetPreviousPrize.toEpochDay();
-
-                        if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
-
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
-                            JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
-                            log.info(jsonObjectSpending.toString());
-
-                            float spendingMoneyInDay = 0f;
-                            try {
-                                spendingMoneyInDay = jsonObjectSpending.getAsJsonArray("result")
-                                        .get(0).getAsJsonObject().get("total").getAsFloat();
-                            } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
-                                log.info("Ни рубля не потратил :(");
-                            }
-                            user.setMoneySpentInDay((long) spendingMoneyInDay);
-                            System.out.println("Spend money: " + spendingMoneyInDay);
-
-                            if (spendingMoneyInDay >= 100) {
-
-                                statusPrize.setReceivedPrizeOfDay8(true);
-                                user.setCurrentStreakDay(currentStreakDay + 1);
-                                user.setPrizeJson(statusPrize);
-                                userRepository.save(user);
-
-                                EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
-
-                                telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("20 баллов получено"));
-                                String urlAward = String.format(awardUser, user.getGizmoName(), 20);
-                                connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
-
-                            } else {
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
-                            }
-                        } else if (betweenDateGetPrevPrizeAndCurrentDate == 0) {
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
-                        } else {
-                            user.setIsZeroingStreak(true);
-                            telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
-                        }
-                    } else {
-                        telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
-                    }
-                } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
-                }
             } else if ("9".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay9()) {
                     if (currentStreakDay == 8) {
@@ -595,7 +738,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -613,11 +756,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay9(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("25 баллов получено"));
@@ -631,14 +775,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("||Ещё рано||"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(9));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("10".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay10()) {
                     if (currentStreakDay == 9) {
@@ -649,7 +803,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -667,14 +821,15 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay10(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №10 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
                                 telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
@@ -684,14 +839,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(10));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("11".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay11()) {
                     if (currentStreakDay == 10) {
@@ -702,7 +867,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -720,11 +885,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay11(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
@@ -737,14 +903,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(11));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("12".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay12()) {
                     if (currentStreakDay == 11) {
@@ -755,7 +931,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -773,11 +949,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay12(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
@@ -791,14 +968,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(12));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("13".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay13()) {
                     if (currentStreakDay == 12) {
@@ -809,7 +996,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -827,11 +1014,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay13(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("40 баллов получено"));
@@ -845,14 +1033,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(13));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("14".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay14()) {
                     if (currentStreakDay == 13) {
@@ -863,7 +1061,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -881,14 +1079,15 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay14(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.secondInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №14 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
                                 telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
@@ -898,14 +1097,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(14));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("15".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay15()) {
                     if (currentStreakDay == 14) {
@@ -916,7 +1125,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -934,11 +1143,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay15(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.thirdInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("25 баллов получено"));
@@ -952,14 +1162,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(15));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("16".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay2()) {
                     if (currentStreakDay == 15) {
@@ -970,7 +1190,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -988,11 +1208,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay16(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.thirdInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
@@ -1006,14 +1227,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(16));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("17".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay17()) {
                     if (currentStreakDay == 16) {
@@ -1024,7 +1255,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1042,14 +1273,15 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay17(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.thirdInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №17 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
                                 telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
@@ -1059,14 +1291,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(17));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("18".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay18()) {
                     if (currentStreakDay == 17) {
@@ -1077,7 +1319,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1095,11 +1337,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay18(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.thirdInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("35 баллов получено"));
@@ -1113,14 +1356,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(18));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("19".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay19()) {
                     if (currentStreakDay == 18) {
@@ -1131,7 +1384,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1149,11 +1402,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay19(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.thirdInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("40 баллов получено"));
@@ -1167,14 +1421,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(19));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("20".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay20()) {
                     if (currentStreakDay == 19) {
@@ -1185,7 +1449,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1203,11 +1467,12 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay20(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.thirdInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("45 баллов получено"));
@@ -1221,14 +1486,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(20));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("21".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay21()) {
                     if (currentStreakDay == 20) {
@@ -1239,7 +1514,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1257,14 +1532,15 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay21(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
                                 EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(userIdCallbackQuery, messageId)
-                                        .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
+                                        .replyMarkup(keyboardService.thirdInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №21 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
                                 telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
@@ -1274,14 +1550,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(21));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("22".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay22()) {
                     if (currentStreakDay == 21) {
@@ -1292,7 +1578,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1310,6 +1596,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay22(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
@@ -1328,14 +1615,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(22));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("23".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay23()) {
                     if (currentStreakDay == 22) {
@@ -1346,7 +1643,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1364,6 +1661,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay23(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
@@ -1382,14 +1680,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(23));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("24".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay24()) {
                     if (currentStreakDay == 23) {
@@ -1400,7 +1708,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1418,6 +1726,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay24(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
@@ -1425,7 +1734,7 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №24 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
                                 telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
@@ -1435,14 +1744,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(24));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("25".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay25()) {
                     if (currentStreakDay == 24) {
@@ -1453,7 +1772,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1471,6 +1790,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay25(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
@@ -1489,14 +1809,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(25));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("26".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay26()) {
                     if (currentStreakDay == 25) {
@@ -1507,7 +1837,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1525,6 +1855,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay26(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
@@ -1543,14 +1874,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(26));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("27".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay27()) {
                     if (currentStreakDay == 26) {
@@ -1561,7 +1902,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1579,6 +1920,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay27(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
 
@@ -1597,14 +1939,24 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(27));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
+
             } else if ("28".equals(update.callbackQuery().data())) {
                 if (!statusPrize.getReceivedPrizeOfDay28()) {
                     if (currentStreakDay == 27) {
@@ -1615,7 +1967,7 @@ public class CallBackService {
 
                         if (betweenDateGetPrevPrizeAndCurrentDate == 1) {
 
-                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), dateGetPreviousPrize, currentDate);
+                            String urlSpending = String.format(gizmoUserSpendingUrl, user.getGizmoId(), currentDate, currentDate.plusDays(1));
                             JsonObject jsonObjectSpending = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), urlSpending);
                             log.info(jsonObjectSpending.toString());
 
@@ -1633,6 +1985,7 @@ public class CallBackService {
 
                                 statusPrize.setReceivedPrizeOfDay28(true);
                                 user.setCurrentStreakDay(currentStreakDay + 1);
+                                user.setDateGetPreviousPrize(LocalDateTime.now(ZoneId.of("UTC+3")));
                                 user.setIsZeroingStreak(true);
                                 user.setPrizeJson(statusPrize);
                                 userRepository.save(user);
@@ -1641,7 +1994,7 @@ public class CallBackService {
                                         .replyMarkup(keyboardService.fourthInlineKeyboardWithPrizes(userIdCallbackQuery));
 
                                 telegramBot.execute(editMessageReplyMarkup);
-                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз №28 получен"));
+                                telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
                                 telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
 
                             } else {
@@ -1651,14 +2004,23 @@ public class CallBackService {
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награду можно получить завтра"));
                         } else {
                             user.setIsZeroingStreak(true);
+                            user.setPrizeJson(new PrizeJson());
+                            userRepository.save(user);
                             telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ты пропустил 1 день"));
                         }
                     } else {
                         telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Ещё рано"));
                     }
                 } else {
-                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Приз был уже получен"));
+                    telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда была уже получена"));
                 }
+
+                action.setAction(Actions.CALLBACK_DAY.callbackDay(28));
+                action.setUserTelegramId(user.getTelegramId());
+                action.setMoneySpent(user.getMoneySpentInDay());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                actionRepository.save(action);
             }
         }
     }

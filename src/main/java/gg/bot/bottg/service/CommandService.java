@@ -51,11 +51,13 @@ public class CommandService {
     private final TelegramBot telegramBot;
     private final KeyboardService keyboardService;
     private final ConnectionGizmoService connectionGizmoService;
+    private final SessionService sessionService;
 
-    public CommandService(TelegramBot telegramBot, KeyboardService keyboardService, ConnectionGizmoService connectionGizmoService) {
+    public CommandService(TelegramBot telegramBot, KeyboardService keyboardService, ConnectionGizmoService connectionGizmoService, SessionService sessionService) {
         this.telegramBot = telegramBot;
         this.keyboardService = keyboardService;
         this.connectionGizmoService = connectionGizmoService;
+        this.sessionService = sessionService;
     }
 
 
@@ -82,19 +84,20 @@ public class CommandService {
                 telegramBot.execute(new SendMessage(telegramUserId, """
                         Это [GGBot](https://vk.com/ggclub36) 😎
                         
-                        Бот будет выдавать тебе награды, при совершении ежедневных денежных операций в клубе через свой аккаунт: покупка товаров из бара, пакетов времени. 
+                        Бот будет выдавать тебе награды при совершении ежедневных денежных операций в клубе через свой аккаунт: покупка товаров из бара, пакетов времени. 
        
-                         Для того, чтобы получить приз, нужно:
+                         Для того, чтобы получить награду, нужно:
                         1️⃣ Привязать клубный аккаунт к боту
                         2️⃣ Прийти в GG и совершить любую покупку на аккаунте на сумму 100 рублей или более
-                        3️⃣ После покупки зайти к боту и нажать в меню призов(_будет выслано после привязки акка_) на кнопку с текущем днём
+                        3️⃣ После покупки зайти к боту и нажать в меню наград(_будет выслано после привязки акка_) на кнопку с текущем днём
                         """).parseMode(ParseMode.Markdown).replyMarkup(keyboardService.chooseYeaOrNo()));
 
                 telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.typing));
                 telegramBot.execute(new SendMessage(telegramUserId, "Для того, чтобы продолжить пользоваться ботом, нажми \"Да\"")
                         .replyMarkup(keyboardService.chooseYeaOrNo()));
 
-                action.setAction(Actions.START_COMMAND_NEW_USER.getActionName());
+                action.setAction(Actions.START_COMMAND_NEW_USER.toString());
+                action.setCurrentStreakDay(userStart.getCurrentStreakDay());
                 action.setUserTelegramId(telegramUserId);
                 action.setUserTelegramNickname(update.message().from().username());
                 actionRepository.save(action);
@@ -105,18 +108,20 @@ public class CommandService {
 
                 if (userStartExist.getAuthorizationInGizmoAccount()) {
 
-                    action.setAction(Actions.START_COMMAND_EXIST_USER.getActionName());
+                    action.setAction(Actions.START_COMMAND_EXIST_USER.toString());
+                    action.setCurrentStreakDay(userStartExist.getCurrentStreakDay());
                     action.setUserTelegramId(telegramUserId);
                     action.setUserTelegramNickname(update.message().from().username());
                     actionRepository.save(action);
 
                     userStartExist.setCondition(Conditions.USER_IS_EXIST);
+                    userRepository.save(userStartExist);
                     telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.typing));
                     telegramBot.execute(new SendMessage(telegramUserId, "Вы уже авторизованы. " +
                             "Сейчас отправлю меню с наградами").replyMarkup(new ReplyKeyboardRemove()));
 
                     telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.typing));
-                    telegramBot.execute(new SendMessage(telegramUserId, "Призы").replyMarkup(
+                    telegramBot.execute(new SendMessage(telegramUserId, "Награды").replyMarkup(
                             keyboardService.firstInlineKeyboardWithPrizes(telegramUserId)));
 
                 }
@@ -129,17 +134,18 @@ public class CommandService {
 
         Action action = new Action();
         Long telegramUserId = update.message().from().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
 
         if ("да".equalsIgnoreCase(update.message().text())
                 || "Да ☺️".equals(update.message().text())) {
 
-            User user = userRepository.getUserByTelegramId(telegramUserId).get();
             user.setCondition(Conditions.SELECTED_STREAK_AND_WAIT_GIZMO_LOGIN);
             userRepository.save(user);
 
             telegramBot.execute(new SendMessage(telegramUserId, "Введите ник из клуба: "));
 
-            action.setAction(Actions.YES_COMMAND.getActionName());
+            action.setAction(Actions.YES_COMMAND.toString());
+            action.setCurrentStreakDay(user.getCurrentStreakDay());
             action.setUserTelegramId(telegramUserId);
             action.setUserTelegramNickname(user.getTelegramNickname());
             actionRepository.save(action);
@@ -147,14 +153,18 @@ public class CommandService {
         } else if ("нет".equalsIgnoreCase(update.message().text())
                 || "Нет \uD83E\uDD72".equals(update.message().text())) {
 
-            action.setAction(Actions.NO_COMMAND.getActionName());
+            action.setAction(Actions.NO_COMMAND.toString());
             action.setUserTelegramId(telegramUserId);
             action.setUserTelegramNickname(update.message().from().username());
             actionRepository.save(action);
 
+            user.setCondition(Conditions.SELECTED_STREAK_AND_WAIT_GIZMO_LOGIN);
+            userRepository.save(user);
             telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.choose_sticker));
             telegramBot.execute(new SendSticker(telegramUserId, "CAACAgIAAxkBAAEIeYVkLoJIo2uIHHsGtlVbvmad4Y-3dgACDgEAAsFGhhufbS2BFcch4i8E"));
-            telegramBot.execute(new SendMessage(telegramUserId, "Эх, следи за новостями в группе."));
+            telegramBot.execute(new SendMessage(telegramUserId, "Эх, следи за новостями в группе vk.com/ggclub36"));
+            telegramBot.execute(new SendMessage(telegramUserId, "Если захочешь продолжить пользоваться ботом, " +
+                    "то просто начни вводить свой ник из клуба"));
 
         }
     }
@@ -184,7 +194,8 @@ public class CommandService {
 
         action.setUserTelegramId(telegramUserId);
         action.setUserTelegramNickname(update.message().from().username());
-        action.setAction(Actions.GIZMO_PASS_ENTER.getActionName());
+        action.setCurrentStreakDay(user.getCurrentStreakDay());
+        action.setAction(Actions.GIZMO_PASS_ENTER.toString());
         actionRepository.save(action);
 
         user.setCondition(Conditions.SELECTED_STREAK_AND_WAIT_GIZMO_PASS);
@@ -216,13 +227,15 @@ public class CommandService {
 
         } catch (UnsupportedOperationException e) {
 
-            action.setAction(Actions.GIZMO_LOGIN_AND_PASS_INCORRECT.getActionName());
+            action.setAction(Actions.GIZMO_LOGIN_AND_PASS_INCORRECT.toString());
+            action.setCurrentStreakDay(user.getCurrentStreakDay());
             action.setUserTelegramId(telegramUserId);
             action.setUserTelegramNickname(user.getTelegramNickname());
             actionRepository.save(action);
 
-            telegramBot.execute(new SendMessage(telegramUserId, "Неверные данные. Введите логин и пароль данные"));
-            userGizmoId = 1111111L;
+            telegramBot.execute(new SendMessage(telegramUserId, "Неверные данные. Введите логин и пароль заново." +
+                    "\nЛогин:"));
+            userGizmoId = 11111111L;
             user.setCondition(Conditions.SELECTED_STREAK_AND_WAIT_GIZMO_LOGIN);
             userRepository.save(user);
 
@@ -238,7 +251,8 @@ public class CommandService {
 
             if (users.size() > 1) {
 
-                action.setAction(Actions.GIZMO_USER_EXIST.getActionName());
+                action.setAction(Actions.GIZMO_USER_EXIST.toString());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
                 action.setUserTelegramNickname(user.getTelegramNickname());
                 action.setUserTelegramId(telegramUserId);
                 actionRepository.save(action);
@@ -253,15 +267,18 @@ public class CommandService {
 
             } else {
 
-                action.setAction(Actions.GIZMO_LOGIN_AND_PASS_CORRECT.getActionName());
+                action.setAction(Actions.GIZMO_LOGIN_AND_PASS_CORRECT.toString());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
                 action.setUserTelegramId(telegramUserId);
                 action.setUserTelegramNickname(user.getTelegramNickname());
                 actionRepository.save(action);
 
                 telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.typing));
                 telegramBot.execute(new SendMessage(telegramUserId, "Аккаунт успешно привязан").replyMarkup(new ReplyKeyboardRemove()));
-                telegramBot.execute(new SendMessage(telegramUserId, "Теперь тебе доступны призы").replyMarkup(
+                telegramBot.execute(new SendMessage(telegramUserId, "Теперь тебе доступен список наград" +
+                        "\nПриходи в клуб каждый день, совершай покупки и получай награды!").replyMarkup(
                         keyboardService.firstInlineKeyboardWithPrizes(telegramUserId)));
+
                 user.setAuthorizationInGizmoAccount(true);
                 user.setCondition(Conditions.CHOOSE_PRIZE);
                 user.setGizmoId(userGizmoId);
@@ -270,7 +287,8 @@ public class CommandService {
             }
         } else {
 
-            action.setAction(Actions.GIZMO_LOGIN_AND_PASS_INCORRECT.getActionName());
+            action.setAction(Actions.GIZMO_LOGIN_AND_PASS_INCORRECT.toString());
+            action.setCurrentStreakDay(user.getCurrentStreakDay());
             action.setUserTelegramId(telegramUserId);
             action.setUserTelegramNickname(user.getTelegramNickname());
 
@@ -285,21 +303,28 @@ public class CommandService {
         }
     public void getPrizeInlineKeyboard(Update update) {
 
-        Action action = new Action();
-        action.setAction(Actions.GETPRIZES_COMMAND.getActionName());
-        action.setUserTelegramNickname(update.message().from().username());
-        action.setUserTelegramId(update.message().chat().id());
-        actionRepository.save(action);
-
         Long telegramUserId = update.message().from().id();
-        User user = userRepository.getUserByTelegramId(telegramUserId).get();
 
-        if ("/getprizes".equalsIgnoreCase(update.message().text()) && user.getCondition() != null) {
-            if (user.getAuthorizationInGizmoAccount()) {
-                telegramBot.execute(new SendMessage(telegramUserId, "Призы").replyMarkup(
-                        keyboardService.firstInlineKeyboardWithPrizes(telegramUserId)));
-            } else {
-                telegramBot.execute(new SendMessage(telegramUserId, "Сначала нужно ввести данные аккаунта клуба"));
+        if (userRepository.getUserByTelegramId(telegramUserId).isPresent()) {
+
+            User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+
+            if ("/getawards".equalsIgnoreCase(update.message().text()) && user.getCondition() != null) {
+
+                Action action = new Action();
+                action.setAction(Actions.GETPRIZES_COMMAND.toString());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+                action.setUserTelegramNickname(update.message().from().username());
+                action.setUserTelegramId(update.message().chat().id());
+                actionRepository.save(action);
+
+                if (user.getAuthorizationInGizmoAccount()) {
+                    telegramBot.execute(new SendMessage(telegramUserId, "Награды").replyMarkup(
+                            keyboardService.firstInlineKeyboardWithPrizes(telegramUserId)));
+                } else {
+                    telegramBot.execute(new SendMessage(telegramUserId, "Сначала нужно ввести данные аккаунта клуба"));
+                }
             }
         }
     }
@@ -319,6 +344,37 @@ public class CommandService {
                 prizeRepository.save(prize);
             }
         }
+    }
+
+    public void getComputersSessions(Update update) {
+
+        Action action = new Action();
+        Optional<User> userOptional = userRepository.getUserByTelegramId(update.message().chat().id());
+
+
+        if ("/getcomps".equals(update.message().text())) {
+            if (userOptional.isPresent()) {
+
+                User user = userOptional.get();
+                action.setAction(Actions.GET_COMPUTERS_SESSIONS_AUTH.toString());
+                action.setUserTelegramId(user.getTelegramId());
+                action.setUserTelegramNickname(user.getTelegramNickname());
+                action.setCurrentStreakDay(user.getCurrentStreakDay());
+
+                if (user.getAuthorizationInGizmoAccount()) {
+
+                    sessionService.userActiveTime(update, true);
+
+                } else {
+
+                    telegramBot.execute(new SendMessage(user.getTelegramId(), "Комманда доступна только авторизованным" +
+                            " пользователям"));
+                }
+            } else {
+                action.setAction(Actions.GET_COMPUTERS_SESSIONS_NO_AUTH.toString());
+            }
+        }
+        actionRepository.save(action);
     }
 
     public void deleteUserData(Update update) {
@@ -369,17 +425,41 @@ public class CommandService {
 
     public void sendAllUsersIdAndName(Update update) {
 
-        if ("/sendusers".equals(update.message().text()) && myTelegramId.equals(update.message().chat().id())) {
+        if ("/sendusers".equals(update.message().text()) && (myTelegramId.equals(update.message().chat().id()) ||
+                update.message().chat().id().equals(792057L))) {
 
             List<User> userList = userRepository.findAll();
             StringBuilder sb = new StringBuilder();
 
             userList.forEach(user -> {
-                sb.append(user.getTelegramFirstName()).append(" ").append(user.getTelegramSecondName()).append(": ")
-                        .append(user.getTelegramId()).append("\n");
+                sb.append(user.getTelegramFirstName()).append(" ").append(user.getTelegramNickname()).append(": ")
+                        .append(user.getTelegramId()).append(" ").append(user.getCurrentStreakDay()).append("\n");
             });
 
-            telegramBot.execute(new SendMessage(myTelegramId, sb.toString()));
+            telegramBot.execute(new SendMessage(update.message().chat().id(), sb.toString()));
+        }
+    }
+
+    public void sendMessageToAllUsers(Update update) {
+
+        if (update.message().text().startsWith("/sendtoallmsg") && myTelegramId.equals(update.message().chat().id())) {
+
+            List<User> users = userRepository.findAll();
+
+            String[] strArr = update.message().text().split(" ");
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 1; i < strArr.length; i++) {
+                sb.append(strArr[i]).append(" ");
+            }
+
+            if (!users.isEmpty()) {
+
+                users.forEach(user -> {
+
+                    telegramBot.execute(new SendMessage(user.getTelegramId(), sb.toString()).disableNotification(true));
+                });
+            }
         }
     }
 }
