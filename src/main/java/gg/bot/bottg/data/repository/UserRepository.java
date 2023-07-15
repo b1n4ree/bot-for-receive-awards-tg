@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -14,4 +15,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     public Optional<User> getUserByGizmoId(Long gizmoId);
     public Optional<List<User>> getUsersByGizmoName(String gizmoName);
     public Optional<List<User>> getUsersByAuthorizationInGizmoAccount(Boolean isAuth);
+    public Optional<User> getUserByGizmoName(String gizmoName);
 }

@@ -37,7 +37,7 @@ public class CallBackService {
                                                     Награда доступна!
                                                     Подойди к админу и покажи это сообщение.
                                                     Пакет времени можно получить до:
-                                                 """ + LocalDate.now(ZoneId.of("UTC+3")) + " 23:59";
+                                                 """;
 
     private final UserRepository userRepository;
 
@@ -377,7 +377,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена!"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -636,7 +637,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -830,7 +832,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -894,7 +897,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("30 баллов получено"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1088,7 +1092,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1282,7 +1287,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1541,7 +1547,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1735,7 +1742,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));
@@ -1995,7 +2003,8 @@ public class CallBackService {
 
                                 telegramBot.execute(editMessageReplyMarkup);
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Награда получена"));
-                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET));
+                                telegramBot.execute(new SendMessage(user.getTelegramId(), TEXT_PACKAGE_TIME_GET +
+                                        LocalDate.now(ZoneId.of("UTC+3")) + " 23:59"));
 
                             } else {
                                 telegramBot.execute(new AnswerCallbackQuery(update.callbackQuery().id()).text("Недостаточно потрачено денег"));

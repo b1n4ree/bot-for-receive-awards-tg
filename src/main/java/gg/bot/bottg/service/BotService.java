@@ -96,6 +96,8 @@ public class BotService implements UpdatesListener {
 
                 if (update.message().text() != null) {
 
+//                    commandService.sendUsersStats(update);
+
                     commandService.changePrizeName(update);
                     commandService.startCommand(update);
 
@@ -125,9 +127,25 @@ public class BotService implements UpdatesListener {
 
                             commandService.waitGizmoPasswordCommand(update);
 
-                        } else if (Conditions.DELETE_SELECT.equals(user.getCondition())) {
+                        } else if (Conditions.RECPASS_ENTER_PHONE_NUMBER.equals(user.getCondition())) {
 
-//                            commandService.deleteUserData(update);
+                            commandService.recoveryPasswordEnterNumberPhone(update);
+
+                        } else if (Conditions.RECPASS_ENTER_FOUR_NUMBER_CODE.equals(user.getCondition())) {
+
+                            commandService.recoveryPasswordEnterFourNumberCode(update);
+
+                        } else if (Conditions.RECPASS_ENTER_NEW_PASS.equals(user.getCondition())) {
+
+                            commandService.recoveryPasswordEnterNewPassword(update);
+
+                        } else if (Conditions.PROMO_START_ENTER.equals(user.getCondition())) {
+
+                            commandService.enterPromo(update);
+
+                        } else if (Conditions.RECPASS_ENTER_AGAIN_CONFIRM_CODE_OR_SEND_NEW_CONFIRM_CODE.equals(user.getCondition())) {
+
+                            commandService.chooseEnterAgainConfirmCodeOrGetNewCode(update);
 
                         } else {
 
@@ -136,6 +154,8 @@ public class BotService implements UpdatesListener {
                             commandService.getPrizeInlineKeyboard(update);
                             commandService.getComputersSessions(update);
                             commandService.sendMessageToAllUsers(update);
+                            commandService.recoveryPasswordCommandInfo(update);
+                            commandService.startPromo(update);
 //                            commandService.deleteUserData(update);
                         }
                     }

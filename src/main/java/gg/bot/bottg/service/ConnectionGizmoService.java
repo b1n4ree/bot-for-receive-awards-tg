@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -120,8 +123,32 @@ public class ConnectionGizmoService {
         try {
             HttpResponse response = httpClient.execute(put);
             System.out.println(response.getStatusLine().getStatusCode());
+            String str = EntityUtils.toString(response.getEntity());
+            JsonObject jsonObject = new Gson().fromJson(str, JsonObject.class);
+            System.out.println(jsonObject);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public JsonObject connectionPost(String token, String url) {
+
+        url = gizmoUrl + url;
+        System.out.println(url);
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+
+        HttpPost post = new HttpPost(url);
+        post.addHeader("Authorization","Bearer "+ token);
+        JsonObject jsonObject;
+        try {
+            HttpResponse response = httpClient.execute(post);
+            System.out.println(response.getStatusLine().getStatusCode());
+            String str = EntityUtils.toString(response.getEntity());
+            jsonObject = new Gson().fromJson(str, JsonObject.class);
+            System.out.println(jsonObject);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return jsonObject;
     }
 }

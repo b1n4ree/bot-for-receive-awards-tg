@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-@Service
+@Component
 public class ScheduledTaskService {
 
     @Value("${telegram_id_al}")
@@ -41,6 +42,7 @@ public class ScheduledTaskService {
 
         if (usersOptional.isPresent()) {
 
+            log.info("Present");
             List<User> userWithGizmoAcc = usersOptional.get();
             userWithGizmoAcc.forEach(user -> {
 

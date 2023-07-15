@@ -1,5 +1,6 @@
 package gg.bot.bottg.service;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -15,6 +16,7 @@ import gg.bot.bottg.data.entity.Prize;
 import gg.bot.bottg.data.entity.User;
 import gg.bot.bottg.data.repository.PrizeRepository;
 import gg.bot.bottg.data.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +24,10 @@ import org.springframework.stereotype.Component;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @Slf4j
@@ -38,6 +42,14 @@ public class CommandService {
 
     @Value("${telegram_id_al}")
     private Long myTelegramId;
+
+    private List<String> phoneList;
+
+    private final String urlToSendCallRecovery = "/api/v2/recovery/password/%s/phone";
+
+    //Сначала токен, потом код, потом пароль
+    private final String urlToConfirmAndEnterNewPass = "/api/v2.0/recovery/password/%s/%s/complete?newPassword=%s";
+    private final String promo = "ILGG";
 
     @Autowired
     UserRepository userRepository;
@@ -58,6 +70,7 @@ public class CommandService {
         this.keyboardService = keyboardService;
         this.connectionGizmoService = connectionGizmoService;
         this.sessionService = sessionService;
+        phoneList = new ArrayList<>();
     }
 
 
@@ -142,7 +155,9 @@ public class CommandService {
             user.setCondition(Conditions.SELECTED_STREAK_AND_WAIT_GIZMO_LOGIN);
             userRepository.save(user);
 
-            telegramBot.execute(new SendMessage(telegramUserId, "Введите ник из клуба: "));
+            telegramBot.execute(new SendMessage(telegramUserId, "Введите ник из клуба либо номер телефона, на который регистрировал аккаунт: ")
+                    .replyMarkup(new ReplyKeyboardRemove()));
+            telegramBot.execute(new SendMessage(user.getTelegramId(), "Для восстановления пароля используй комманду: /recpass"));
 
             action.setAction(Actions.YES_COMMAND.toString());
             action.setCurrentStreakDay(user.getCurrentStreakDay());
@@ -164,12 +179,19 @@ public class CommandService {
             telegramBot.execute(new SendSticker(telegramUserId, "CAACAgIAAxkBAAEIeYVkLoJIo2uIHHsGtlVbvmad4Y-3dgACDgEAAsFGhhufbS2BFcch4i8E"));
             telegramBot.execute(new SendMessage(telegramUserId, "Эх, следи за новостями в группе vk.com/ggclub36"));
             telegramBot.execute(new SendMessage(telegramUserId, "Если захочешь продолжить пользоваться ботом, " +
-                    "то просто начни вводить свой ник из клуба"));
+                    "то просто начни вводить свой ник из клуба")
+                    .replyMarkup(new ReplyKeyboardRemove()));
 
         }
     }
 
     public void waitGizmoLoginCommand(Update update) {
+
+        if ("/recpass".equals(update.message().text())) {
+
+            recoveryPasswordCommandInfo(update);
+            return;
+        }
 
         Action action = new Action();
 
@@ -205,7 +227,148 @@ public class CommandService {
         telegramBot.execute(new SendMessage(telegramUserId, "Теперь пароль:"));
     }
 
+    public void recoveryPasswordCommandInfo(Update update) {
+
+        Action action = new Action();
+        Long telegramUserId = update.message().chat().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+        if ("/recpass".equals(update.message().text())) {
+
+            user.setCondition(Conditions.RECPASS_ENTER_PHONE_NUMBER);
+            userRepository.saveAndFlush(user);
+
+            telegramBot.execute(new SendMessage(telegramUserId, "Теперь введи номер телефона, начиная с 7, без пробелов. " +
+                    "Поступит звонок, нужно будет ввести последние 4 цифры номера для подтверждения. Если не поступает звонок или какие-то другие проблемы - свяжись с @a1exi4" +
+                    "\n\nНомер телефона:"));
+        }
+
+    }
+
+    public void recoveryPasswordEnterNumberPhone(Update update) {
+
+        Long telegramUserId = update.message().chat().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+        if (Conditions.RECPASS_ENTER_PHONE_NUMBER.equals(user.getCondition())) {
+
+            String phone = update.message().text();
+            String urlRecovery = String.format(urlToSendCallRecovery, phone);
+
+            JsonObject jsonObject = connectionGizmoService.connectionPost(connectionGizmoService.getToken(), urlRecovery);
+            String token = "";
+
+            user.setGizmoUserPhoneNumber(phone);
+
+            try {
+                token = jsonObject.get("result").getAsJsonObject().get("token").getAsString();
+            } catch (UnsupportedOperationException e) {
+                token = "null";
+            }
+
+            if ("null".equals(token)) {
+
+                telegramBot.execute(new SendMessage(telegramUserId, "Номер не найден. Проверь номер и попробуй ещё раз"));
+            } else {
+
+
+                user.setCondition(Conditions.RECPASS_ENTER_FOUR_NUMBER_CODE);
+                user.setGizmoTokenRecovery(token);
+                userRepository.saveAndFlush(user);
+                System.out.println("267 " + user.getGizmoTokenRecovery());
+                telegramBot.execute(new SendMessage(telegramUserId, "Дождись звонка и введи последние 4 цифры номера" +
+                        "\n4-значный код:"));
+            }
+        }
+        return;
+    }
+
+    public void recoveryPasswordEnterFourNumberCode(Update update) {
+
+        Long telegramUserId = update.message().chat().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+        if (Conditions.RECPASS_ENTER_FOUR_NUMBER_CODE.equals(user.getCondition())) {
+
+            user.setGizmoCodeRecovery(update.message().text());
+            user.setCondition(Conditions.RECPASS_ENTER_NEW_PASS);
+            userRepository.saveAndFlush(user);
+
+            telegramBot.execute(new SendMessage(telegramUserId, "Теперь введи новый пароль:"));
+        }
+        return;
+    }
+
+    public void recoveryPasswordEnterNewPassword(Update update) {
+
+        Long telegramUserId = update.message().chat().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+        if (Conditions.RECPASS_ENTER_NEW_PASS.equals(user.getCondition())) {
+
+            String pass = update.message().text();
+            String token = user.getGizmoTokenRecovery();
+            String code = user.getGizmoCodeRecovery();
+            String url = String.format(urlToConfirmAndEnterNewPass, token, code, pass);
+
+            JsonObject jsonObject = connectionGizmoService.connectionPost(connectionGizmoService.getToken(), url);
+
+            int result = jsonObject.get("result").getAsInt();
+
+
+
+            if (result == 0) {
+
+                telegramBot.execute(new SendMessage(telegramUserId, "Твой пароль: " + "||" + pass + "||").parseMode(ParseMode.MarkdownV2));
+                telegramBot.execute(new DeleteMessage(telegramUserId, update.message().messageId()));
+
+                user.setCondition(Conditions.SELECTED_STREAK_AND_WAIT_GIZMO_LOGIN);
+                userRepository.saveAndFlush(user);
+
+                telegramBot.execute(new SendMessage(telegramUserId, "Теперь введи никнейм клубного аккаунта либо номер телефона:"));
+
+            } else {
+
+                user.setCondition(Conditions.RECPASS_ENTER_AGAIN_CONFIRM_CODE_OR_SEND_NEW_CONFIRM_CODE);
+                userRepository.saveAndFlush(user);
+                telegramBot.execute(new SendMessage(telegramUserId, "Введён неправильный 4-значный код" +
+                        "\nПроверь код и введи его ещё раз либо получи новый - сделай выбор в меню ниже \uD83D\uDC47").replyMarkup(keyboardService.chooseRecoveryAcc()));
+            }
+        }
+        return;
+    }
+
+    public void chooseEnterAgainConfirmCodeOrGetNewCode(Update update) {
+
+        Long telegramUserId = update.message().chat().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+        if (Conditions.RECPASS_ENTER_AGAIN_CONFIRM_CODE_OR_SEND_NEW_CONFIRM_CODE.equals(user.getCondition())) {
+            if (update.message().text().equalsIgnoreCase("Попробую ввести код ещё раз")) {
+
+                telegramBot.execute(new SendMessage(telegramUserId, "Введи 4-значный код:"));
+                user.setCondition(Conditions.RECPASS_ENTER_FOUR_NUMBER_CODE);
+                userRepository.saveAndFlush(user);
+
+
+            } else if (update.message().text().equalsIgnoreCase("Получить новый код")) {
+
+                user.setCondition(Conditions.RECPASS_ENTER_NEW_PASS);
+                userRepository.saveAndFlush(user);
+                recoveryPasswordEnterNumberPhone(update);
+            }
+        }
+
+
+    }
+
     public void waitGizmoPasswordCommand(Update update) {
+
+        if ("/recpass".equals(update.message().text())) {
+
+            recoveryPasswordCommandInfo(update);
+            return;
+        }
 
         Action action = new Action();
         Long telegramUserId = update.message().from().id();
@@ -276,7 +439,8 @@ public class CommandService {
                 telegramBot.execute(new SendChatAction(telegramUserId, ChatAction.typing));
                 telegramBot.execute(new SendMessage(telegramUserId, "Аккаунт успешно привязан").replyMarkup(new ReplyKeyboardRemove()));
                 telegramBot.execute(new SendMessage(telegramUserId, "Теперь тебе доступен список наград" +
-                        "\nПриходи в клуб каждый день, совершай покупки и получай награды!").replyMarkup(
+                        "\nПриходи в клуб каждый день, совершай покупки и получай награды!" +
+                        "\n\nЧтобы использовать промокод, заюзай команду /promocode").replyMarkup(
                         keyboardService.firstInlineKeyboardWithPrizes(telegramUserId)));
 
                 user.setAuthorizationInGizmoAccount(true);
@@ -327,6 +491,8 @@ public class CommandService {
                 }
             }
         }
+
+        return;
     }
 
     public void changePrizeName(Update update) {
@@ -344,6 +510,7 @@ public class CommandService {
                 prizeRepository.save(prize);
             }
         }
+        return;
     }
 
     public void getComputersSessions(Update update) {
@@ -363,7 +530,7 @@ public class CommandService {
 
                 if (user.getAuthorizationInGizmoAccount()) {
 
-                    sessionService.userActiveTime(update, true);
+                    sessionService.userActiveTime(update, user.getIsAdmin());
 
                 } else {
 
@@ -461,5 +628,108 @@ public class CommandService {
                 });
             }
         }
+    }
+
+    @PostConstruct
+    public void sendUsersStats() {
+
+        String regex = "^((8|\\+7)[\\- ]?)?(\\(?\\d{3}\\)?[\\- ]?)?[\\d\\- ]{7,10}$";
+        Pattern pattern = Pattern.compile(regex);
+        String spending = "/api/reports/users/spending?start=2021-01-01&end=2023-07-04";
+        String userInfo = "/api/users";
+        LocalDate start = LocalDate.of(2021, 1, 1);
+
+        StringBuilder sb = new StringBuilder();
+        JsonArray jsonArray = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), spending).getAsJsonArray("result");
+
+        jsonArray.forEach(user -> {
+
+            JsonObject userJO = user.getAsJsonObject();
+            long userId = userJO.get("userId").getAsLong();
+            String userName = userJO.get("username").getAsString();
+            long userSpent = userJO.get("total").getAsLong();
+
+            if (userSpent > 933) {
+
+                String id = "/api/users/" + userId;
+                JsonObject userArray = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), id).getAsJsonObject("result");
+
+                try {
+                    String phone = userArray.get("mobilePhone").getAsString();
+                    Matcher matcher = pattern.matcher(phone);
+
+                    if (matcher.matches()) {
+
+                        phoneList.add(phone);
+                    }
+
+                } catch (UnsupportedOperationException ignored) {
+                }
+            }
+        });
+
+        Set<String> set = new HashSet<>(phoneList);
+        phoneList.clear();
+        phoneList.addAll(set);
+        phoneList.add("79518695985");
+        phoneList.add("79920116722");
+        phoneList.add("79923324471");
+        System.out.println("Create phoneList");
+    }
+
+    public void startPromo(Update update) {
+
+        Long telegramUserId = update.message().chat().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+        if ("/promocode".equalsIgnoreCase(update.message().text())) {
+
+            String url = "/api/users/" + user.getGizmoId();
+            String mobilePhone = "";
+
+            try {
+                mobilePhone = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), url)
+                        .getAsJsonObject("result").get("mobilePhone").getAsString();
+            } catch (UnsupportedOperationException ignored) {
+
+            }
+
+            if (phoneList.contains(mobilePhone)) {
+                if (user.getIsEnterPromo()) {
+
+                    telegramBot.execute(new SendMessage(telegramUserId, "Вами был уже введён промокод \uD83D\uDE0E"));
+
+                } else {
+
+                    user.setCondition(Conditions.PROMO_START_ENTER);
+                    userRepository.saveAndFlush(user);
+                    telegramBot.execute(new SendMessage(telegramUserId, "Если у Вас есть промокод, то введите его:"));
+                }
+            } else {
+                telegramBot.execute(new SendMessage(telegramUserId, "Нет доступных промокодов"));
+            }
+        }
+        return;
+    }
+
+    public void enterPromo(Update update) {
+
+        Long telegramUserId = update.message().chat().id();
+        User user = userRepository.getUserByTelegramId(telegramUserId).get();
+
+        if (promo.equals(update.message().text()) && Conditions.PROMO_START_ENTER.equals(user.getCondition())) {
+
+            user.setIsEnterPromo(true);
+            user.setCondition(Conditions.CHOOSE_PRIZE);
+            userRepository.saveAndFlush(user);
+
+            String awardUser = "/api/users/%s/points/%s";
+            String urlAward = String.format(awardUser, user.getGizmoId(), 100);
+            connectionGizmoService.connectionPut(connectionGizmoService.getToken(), urlAward);
+
+            telegramBot.execute(new SendMessage(telegramUserId, "Вам было начислено 100 баллов"));
+            telegramBot.execute(new SendMessage(telegramUserId, ""));
+        }
+        return;
     }
 }

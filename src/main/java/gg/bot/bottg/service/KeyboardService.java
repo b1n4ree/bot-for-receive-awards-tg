@@ -1,5 +1,7 @@
 package gg.bot.bottg.service;
 
+import com.pengrad.telegrambot.model.WebAppData;
+import com.pengrad.telegrambot.model.WebAppInfo;
 import com.pengrad.telegrambot.model.request.*;
 import gg.bot.bottg.data.entity.Prize;
 import gg.bot.bottg.data.repository.PrizeRepository;
@@ -45,6 +47,17 @@ public class KeyboardService {
         return new ReplyKeyboardMarkup(
                 new KeyboardButton("Да ☺\uFE0F"),
                 new KeyboardButton("Нет \uD83E\uDD72"))
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true);
+    }
+
+    public Keyboard chooseRecoveryAcc() {
+        return new ReplyKeyboardMarkup(
+                new KeyboardButton("Попробую ввести код ещё раз"))
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(true)
+                .addRow(
+                        new KeyboardButton("Получить новый код"))
                 .resizeKeyboard(true)
                 .oneTimeKeyboard(true);
     }

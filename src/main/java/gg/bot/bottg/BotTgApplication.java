@@ -10,5 +10,4 @@ public class BotTgApplication {
 
         SpringApplication.run(BotTgApplication.class, args);
     }
-
 }

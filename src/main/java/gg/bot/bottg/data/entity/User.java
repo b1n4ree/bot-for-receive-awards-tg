@@ -52,6 +52,15 @@ public class User {
     @Column(name = "gizmo_name")
     private String gizmoName = "gizmoNameStart";
 
+    @Column(name = "gizmo_token_recovery")
+    private String gizmoTokenRecovery;
+
+    @Column(name = "gizmo_code_recovery")
+    private String gizmoCodeRecovery;
+
+    @Column(name = "gizmo_user_phone_number")
+    private String gizmoUserPhoneNumber;
+
     @Column(name = "date_registration")
     private LocalDateTime dateRegistration = LocalDateTime.now(ZoneId.of("UTC+3"));
 
@@ -59,7 +68,7 @@ public class User {
     private Boolean authorizationInGizmoAccount = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "condition_user")
+    @Column(name = "condition_user_conditi")
     private Conditions condition;
 
     @Column(name = "prize")
@@ -78,4 +87,10 @@ public class User {
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
+
+    @Column(name = "is_admin")
+    private Boolean isAdmin = false;
+
+    @Column(name = "is_enter_promo")
+    private Boolean isEnterPromo = false;
 }
