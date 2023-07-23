@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -630,7 +631,7 @@ public class CommandService {
         }
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void sendUsersStats() {
 
         String regex = "^((8|\\+7)[\\- ]?)?(\\(?\\d{3}\\)?[\\- ]?)?[\\d\\- ]{7,10}$";
@@ -671,10 +672,7 @@ public class CommandService {
         Set<String> set = new HashSet<>(phoneList);
         phoneList.clear();
         phoneList.addAll(set);
-        phoneList.add("79518695985");
-        phoneList.add("79920116722");
-        phoneList.add("79923324471");
-        System.out.println("Create phoneList");
+        log.info("Create phoneList");
     }
 
     public void startPromo(Update update) {
@@ -731,5 +729,56 @@ public class CommandService {
             telegramBot.execute(new SendMessage(telegramUserId, ""));
         }
         return;
+    }
+
+    public void test(Update update) {
+
+        Long telegramUserId = update.message().chat().id();
+        List<User> usersIsEnterPromo = userRepository.getUsersByIsEnterPromo(true).get();
+
+
+        StringBuilder sb1 = new StringBuilder();
+        sb1.append("13.07.2023-21.07.2023 period\n");
+        StringBuilder sb2 = new StringBuilder();
+        sb2.append("01.01.2021-13.07 period\n");
+        StringBuilder sb3 = new StringBuilder();
+        sb3.append("Difference between second and first\n");
+
+        usersIsEnterPromo.forEach(user -> {
+
+            String url = String.format("/api/reports/users/spending?userId=%s&start=2023-07-13&end=2023-07-22", user.getGizmoId());
+            String url2 = String.format("/api/reports/users/spending?userId=%s&start=2021-01-01&end=2023-07-12", user.getGizmoId());
+            double totalSpendingInFirstPeriod = -1d;
+            double totalSpendingInSecondPeriod = -1d;
+            String gizmoName1 = "";
+            String gizmoName2 = "";
+
+            try {
+
+                JsonObject result1 = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), url)
+                        .getAsJsonArray("result").getAsJsonArray().get(0).getAsJsonObject();
+                JsonObject result2 = connectionGizmoService.connectionGet(connectionGizmoService.getToken(), url2)
+                        .getAsJsonArray("result").getAsJsonArray().get(0).getAsJsonObject();
+
+                totalSpendingInFirstPeriod =  result1.get("total").getAsDouble();
+                totalSpendingInSecondPeriod =  result2.get("total").getAsDouble();
+                gizmoName1 = result1.get("username").getAsString();
+                gizmoName2 = result2.get("username").getAsString();
+
+                sb1.append(gizmoName1).append(": ").append(totalSpendingInFirstPeriod).append("\n");
+                sb2.append(gizmoName2).append(": ").append(totalSpendingInSecondPeriod).append("\n");
+                sb3.append(gizmoName1).append(": ").append(totalSpendingInSecondPeriod - totalSpendingInFirstPeriod).append("\n");
+            } catch (ClassCastException | IndexOutOfBoundsException ignored) {
+
+            }
+
+
+
+
+        });
+
+        telegramBot.execute(new SendMessage(telegramUserId, sb1.append("----").toString()));
+        telegramBot.execute(new SendMessage(telegramUserId, sb2.append("----").toString()));
+        telegramBot.execute(new SendMessage(telegramUserId, sb3.toString()));
     }
 }

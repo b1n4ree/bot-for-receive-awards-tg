@@ -11,9 +11,10 @@ import java.util.OptionalInt;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    public Optional<User> getUserByTelegramId(Long telegramId);
-    public Optional<User> getUserByGizmoId(Long gizmoId);
-    public Optional<List<User>> getUsersByGizmoName(String gizmoName);
-    public Optional<List<User>> getUsersByAuthorizationInGizmoAccount(Boolean isAuth);
-    public Optional<User> getUserByGizmoName(String gizmoName);
+    Optional<User> getUserByTelegramId(Long telegramId);
+    Optional<User> getUserByGizmoId(Long gizmoId);
+    Optional<List<User>> getUsersByGizmoName(String gizmoName);
+    Optional<List<User>> getUsersByAuthorizationInGizmoAccount(Boolean isAuth);
+    Optional<User> getUserByGizmoName(String gizmoName);
+    Optional<List<User>> getUsersByIsEnterPromo(Boolean isEnter);
 }

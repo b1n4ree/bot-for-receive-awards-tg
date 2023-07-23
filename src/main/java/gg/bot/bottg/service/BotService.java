@@ -98,6 +98,8 @@ public class BotService implements UpdatesListener {
 
 //                    commandService.sendUsersStats(update);
 
+                    commandService.test(update);
+
                     commandService.changePrizeName(update);
                     commandService.startCommand(update);
 
