@@ -9,6 +9,7 @@ import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardRemove;
 import com.pengrad.telegrambot.request.*;
 import gg.bot.bottg.data.entity.Action;
+import gg.bot.bottg.data.entity.CallbackDayReceiveAward;
 import gg.bot.bottg.data.repository.ActionRepository;
 import gg.bot.bottg.enums.Actions;
 import gg.bot.bottg.enums.Conditions;
@@ -731,7 +732,7 @@ public class CommandService {
         return;
     }
 
-    public void test(Update update) {
+    public void test(Update update, String date1, String date2) {
 
         Long telegramUserId = update.message().chat().id();
         List<User> usersIsEnterPromo = userRepository.getUsersByIsEnterPromo(true).get();

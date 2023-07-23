@@ -97,8 +97,7 @@ public class BotService implements UpdatesListener {
                 if (update.message().text() != null) {
 
 //                    commandService.sendUsersStats(update);
-
-                    commandService.test(update);
+//                    commandService.test(update);
 
                     commandService.changePrizeName(update);
                     commandService.startCommand(update);
