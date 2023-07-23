@@ -17,4 +17,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<List<User>> getUsersByAuthorizationInGizmoAccount(Boolean isAuth);
     Optional<User> getUserByGizmoName(String gizmoName);
     Optional<List<User>> getUsersByIsEnterPromo(Boolean isEnter);
+    Optional<List<User>> findUsersByCurrentStreakDayAfter(Long currentAfter);
 }

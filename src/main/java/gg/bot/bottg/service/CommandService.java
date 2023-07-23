@@ -771,10 +771,6 @@ public class CommandService {
             } catch (ClassCastException | IndexOutOfBoundsException ignored) {
 
             }
-
-
-
-
         });
 
         telegramBot.execute(new SendMessage(telegramUserId, sb1.append("----").toString()));

@@ -50,13 +50,46 @@ public class UserService {
         return userDto;
     }
 
-//    public List<UserDto> getUserByCustomParam(int topNumber, String attribute) {
-//
-//        if (attribute != null) {
-//            switch (attribute) {
-//                case "current-streak-day":
-//                    return new ArrayList<UserDto>();
-//            }
-//        }
-//    }
+    //
+    public List<UserDto> getUserByCustomParam(int topNumber, String attribute) {
+
+
+        List<UserDto> usersDto = new ArrayList<>();
+        List<User> users = new ArrayList<>();
+
+        if (attribute != null) {
+            if (attribute.equals("current-streak-day")) {
+
+                Optional<List<User>> usersCur = userRepository.findUsersByCurrentStreakDayAfter(0L);
+
+                usersCur.ifPresent(userList -> userList
+                        .forEach(user -> {
+
+                            UserDto userDto = new UserDto();
+
+                            userDto.setId(user.getId());
+                            userDto.setTelegramId(user.getTelegramId());
+                            userDto.setCurrentStreakDay(user.getCurrentStreakDay());
+                            userDto.setMaxStreakDay(user.getMaxStreakDay());
+                            userDto.setMoneySpentInDay(user.getMoneySpentInDay());
+                            userDto.setMoneySpentInPrevDay(user.getMoneySpentInPreviousDay());
+                            userDto.setGizmoId(user.getGizmoId());
+                            userDto.setTelegramFirstName(user.getTelegramFirstName());
+                            userDto.setTelegramSecondName(user.getTelegramSecondName());
+                            userDto.setGizmoName(user.getGizmoName());
+                            userDto.setDateRegistration(user.getDateRegistration());
+                            userDto.setAuthorizationInGizmoAccount(user.getAuthorizationInGizmoAccount());
+                            userDto.setCondition(user.getCondition());
+                            userDto.setPrizeJson(user.getPrizeJson());
+                            userDto.setDateGetPreviousPrize(user.getDateGetPreviousPrize());
+                            userDto.setIsZeroingStreak(user.getIsZeroingStreak());
+                            userDto.setIsDeleted(user.getIsDeleted());
+                            userDto.setIsAdmin(user.getIsAdmin());
+
+                            usersDto.add(userDto);
+                        }));
+            }
+        }
+        return usersDto;
+    }
 }

@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -20,8 +22,8 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getUserByGizmoName(name));
     }
 
-//    @RequestMapping(value = "/get-top-users-by-number={number}&attribute={attribute}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<UserDto>> getTopUsersBy(@PathVariable int number, @PathVariable String attribute) {
-//        return ResponseEntity.ok().body();
-//    }
+    @RequestMapping(value = "/get-top-users-by-number={number}&attribute={attribute}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<UserDto>> getTopUsersBy(@PathVariable int number, @PathVariable String attribute) {
+        return ResponseEntity.ok().body(userService.getUserByCustomParam(number, attribute));
+    }
 }
